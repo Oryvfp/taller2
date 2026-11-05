@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0056b3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Frenos Móvil">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="./images/LOGO.png">
+    <link rel="apple-touch-icon" href="./images/LOGO.png">
+    <title>FRENOS Móvil - Supabase</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --primary-hover: #004085;
+            --success-color: #28a745;
+            --success-hover: #218838;
+            --danger-color: #dc3545;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #ced4da;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; min-height: 100%; overflow-x: hidden; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color); color: var(--text-color);
+            padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; justify-content: center; align-items: flex-start;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            width: 100%; max-width: 480px; background: var(--card-bg); padding: 14px;
+            border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px;
+        }
+
+        h2 { text-align: center; color: var(--primary-color); margin-bottom: 14px; font-size: 20px; letter-spacing: 0.5px; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; font-weight: 600; font-size: 12px; margin-bottom: 4px; color: #495057; text-transform: uppercase; }
+
+        input[type="text"], input[type="date"] {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
+            border-radius: 8px; font-size: 16px; background-color: #fff; color: var(--text-color);
+        }
+        input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15); }
+
+        .btn-group-foto { display: flex; gap: 8px; margin-top: 6px; }
+        .btn {
+            width: 100%; border: none; padding: 12px; font-size: 15px; font-weight: bold;
+            border-radius: 8px; cursor: pointer; text-align: center; transition: background-color 0.2s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background-color: var(--primary-color); color: white; margin-top: 8px; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-camera { background-color: #17a2b8; color: white; padding: 10px; font-size: 13px; flex: 1; }
+        .btn-gallery { background-color: #6c757d; color: white; padding: 10px; font-size: 13px; flex: 1; }
+        .btn-export { background-color: var(--success-color); color: white; margin-top: 14px; }
+        .btn-export:hover { background-color: var(--success-hover); }
+        .btn-new-day { background-color: var(--danger-color); color: white; margin-top: 8px; }
+        .btn-new-day:hover { background-color: #bd2130; }
+        .btn-delete { background-color: var(--danger-color); color: white; padding: 5px 10px; font-size: 11px; border-radius: 6px; width: auto; margin-top: 6px; }
+        .btn-edit { background-color: #f0ad4e; color: #212529; padding: 5px 10px; font-size: 11px; border-radius: 6px; width: auto; margin-top: 6px; }
+        .btn-install { background-color: #343a40; color: white; margin: 0 0 12px; }
+        .app-status { padding: 9px; margin: 0 0 10px; border-radius: 7px; background: #eef5fc; color: #23496b; font-size: 12px; line-height: 1.4; }
+        .edit-form { margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ced4da; border-radius: 8px; }
+        .edit-form input { width: 100%; padding: 9px; margin: 4px 0 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; }
+
+        .record-list { margin-top: 20px; border-top: 1px solid #e9ecef; padding-top: 14px; }
+        .record-list h3 { font-size: 15px; margin-bottom: 10px; color: #495057; display: flex; justify-content: space-between; align-items: center; }
+        .search-patent { margin-bottom: 12px; }
+        .patent-group { margin-bottom: 14px; padding: 10px; border: 1px solid #d9e2ec; border-radius: 9px; background: #fff; }
+        .patent-group h4 { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; color:var(--primary-color); font-size:15px; }
+        .patent-group h4 span { color:#6c757d; font-size:11px; font-weight:normal; }
+        .btn-history { background:#343a40; color:white; margin:0 0 10px; padding:9px; font-size:13px; }
+        .history-banner { padding:12px; margin:0 0 10px; border:1px solid #b8cce0; border-radius:8px; background:#eef5fc; }
+        .history-banner h5 { margin-bottom:8px; color:#23496b; font-size:14px; }
+        .history-brand { margin-bottom:10px; font-size:12px; }
+        .history-entry { display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid #d5e1ec; font-size:12px; }
+        .history-entry img { width:64px; height:64px; object-fit:cover; border-radius:6px; background:#e1e5e9; }
+        .history-no-photo { width:64px; height:64px; flex:0 0 64px; display:flex; align-items:center; justify-content:center; border-radius:6px; background:#e1e5e9; color:#6c757d; font-size:10px; text-align:center; }
+        .history-details { flex:1; min-width:0; }
+        .badge { background-color: var(--primary-color); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; }
+        .record-item { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--primary-color); font-size: 12px; word-break: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .record-item strong { color: var(--primary-color); font-size: 13px; }
+        .record-photo { display: block; width: 96px; height: 72px; object-fit: cover; border-radius: 6px; margin: 8px 0; background: #e1e5e9; }
+        .empty-msg { text-align: center; color: #6c757d; font-style: italic; font-size: 13px; padding: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>FRENOS MÓVIL (Supabase)</h2>
+    <div id="storageStatus" class="app-status" role="status" aria-live="polite">Preparando el almacenamiento local de este dispositivo…</div>
+    <button type="button" class="btn btn-install" onclick="instalarAplicacion()">Instalar / agregar a inicio</button>
+    <p id="pwaStatus" class="app-status" role="status" aria-live="polite">La instalación como app requiere abrir este sitio mediante HTTPS.</p>
+    
+    <div class="form-group">
+        <label>Patente (NROPAT)</label>
+        <input type="text" id="nropat" maxlength="10" placeholder="Ej: AA123BB" autocapitalize="characters" autocomplete="off" onblur="buscarDatosPatente()">
+    </div>
+    
+    <div class="form-group">
+        <label>Marca (MARCA)</label>
+        <input type="text" id="marca" maxlength="40" placeholder="Ej: Ford, Fiat..." list="sugerenciasMarcas" autocomplete="off">
+        <datalist id="sugerenciasMarcas"></datalist>
+    </div>
+
+    <div class="form-group">
+        <label>Cliente (CLIENTE)</label>
+        <input type="text" id="cliente" maxlength="40" placeholder="Nombre del cliente" list="sugerenciasClientes" autocomplete="off">
+        <datalist id="sugerenciasClientes"></datalist>
+    </div>
+    
+    <div class="form-group">
+        <label>Operario (nombre completo)</label>
+        <input type="text" id="operario" maxlength="80" placeholder="Nombre y apellido del operario" autocomplete="name">
+    </div>
+
+    <div class="form-group">
+        <label>Teléfono (TELEFONO)</label>
+        <input type="text" id="telefono" maxlength="15" placeholder="Teléfono de contacto" autocomplete="off">
+    </div>
+    
+    <div class="form-group">
+        <label>Fecha (FECHA)</label>
+        <input type="date" id="fecha">
+    </div>
+    
+    <div class="form-group">
+        <label>Trabajo (TRABAJO)</label>
+        <input type="text" id="trabajo" maxlength="60" placeholder="Detalle del trabajo realizado" list="sugerenciasTrabajos" autocomplete="off">
+        <datalist id="sugerenciasTrabajos"></datalist>
+    </div>
+    
+    <div class="form-group">
+        <label>IMAGENES</label>
+        <input type="text" id="rutafoto" maxlength="150" placeholder="IMAGENES\archivo.jpg" autocomplete="off">
+        
+        <input type="file" id="inputCamara" accept="image/*" capture="environment" style="display: none;" onchange="procesarImagen(event, true)">
+        <input type="file" id="inputGaleria" accept="image/*" style="display: none;" onchange="procesarImagen(event, false)">
+
+        <div class="btn-group-foto">
+            <button type="button" class="btn btn-camera" onclick="document.getElementById('inputCamara').click()">📷 Tomar Foto</button>
+            <button type="button" class="btn btn-gallery" onclick="document.getElementById('inputGaleria').click()">📂 Buscar Foto</button>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" onclick="guardarRegistro()">Guardar Registro</button>
+    <button type="button" class="btn btn-export" onclick="sincronizarConSupabase()">Sincronizar con Supabase ☁️</button>
+    <button type="button" class="btn btn-new-day" onclick="iniciarNuevoDia()">Start New Day</button>
+    <button type="button" class="btn btn-primary" onclick="mostrarPanelSupabase()">Conectar a Supabase</button>
+    <div id="supabasePanel" style="margin-top:10px;padding:12px;border:1px solid #ced4da;border-radius:8px;background:#f8f9fa">
+      <p style="font-size:13px;margin-bottom:8px">Ingresá el correo y la contraseña del usuario que creaste en Supabase. Se guardará la sesión en este teléfono.</p>
+      <input id="supabaseEmail" type="email" autocomplete="username" placeholder="Correo electrónico" style="width:100%;padding:10px;margin-top:8px;border:1px solid #ced4da;border-radius:6px">
+      <input id="supabasePassword" type="password" autocomplete="current-password" placeholder="Contraseña" style="width:100%;padding:10px;margin-top:8px;border:1px solid #ced4da;border-radius:6px">
+      <button type="button" class="btn btn-primary" onclick="conectarSupabase().catch(e=>alert(e.message))">Ingresar</button>
+      <button type="button" class="btn btn-primary" onclick="cerrarSesionSupabase()">Cerrar sesión</button>
+      <p id="supabaseStatus" style="font-size:13px;margin-top:8px"></p>
+    </div>
+
+    <div class="record-list">
+        <h3>Historial por patente <span class="badge" id="contador">0</span></h3>
+        <div class="form-group search-patent">
+            <label for="buscarPatente">Localizar patente</label>
+            <input type="text" id="buscarPatente" maxlength="10" placeholder="Escribí la patente para filtrar" autocapitalize="characters" autocomplete="off" oninput="actualizarVista()">
+        </div>
+        <div id="listaRegistros"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // URL y clave PUBLICABLE del proyecto. No se incluye ninguna clave secreta.
+    const SUPABASE_URL = 'https://ejvzlmpwgwdwpbhouqol.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_BSHeTWPgQsKNn4DJFR4kSw_H8J9rxQG';
+    const supabaseClient = window.supabase
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+        : null;
+    async function conectarSupabase() {
+        if (!supabaseClient) throw new Error('Supabase no está disponible. Conectate a internet y volvé a cargar la página.');
+        const email = document.getElementById('supabaseEmail').value.trim();
+        const password = document.getElementById('supabasePassword').value;
+        if (!email || !password) throw new Error('Ingresá el correo y la contraseña.');
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw new Error('No se pudo ingresar: ' + error.message);
+        document.getElementById('supabasePassword').value = '';
+        document.getElementById('supabaseStatus').textContent = 'Conectado a Supabase en este teléfono.';
+        alert('Conexión con Supabase correcta.');
+    }
+    async function cerrarSesionSupabase() {
+        if (!supabaseClient) { alert('Supabase no está disponible. Conectate a internet y volvé a cargar la página.'); return; }
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) { alert(error.message); return; }
+        document.getElementById('supabaseStatus').textContent = 'Sesión cerrada.';
+    }
+    function mostrarPanelSupabase() {
+        const p = document.getElementById('supabasePanel');
+        p.hidden = !p.hidden;
+    }
+    (async function comprobarSesionSupabase() {
+        if (!supabaseClient) {
+            document.getElementById('supabaseStatus').textContent = 'Sin conexión con Supabase. Los datos locales siguen disponibles.';
+            return;
+        }
+        try {
+            const { data } = await supabaseClient.auth.getSession();
+            document.getElementById('supabaseStatus').textContent = data.session ? 'Ya hay una sesión activa en este teléfono.' : 'Ingresá para habilitar la sincronización.';
+        } catch (e) { console.warn(e); }
+    })();
+
+    ponerFechaActual();
+
+    let registros = [];
+    let registrosLocalesDisponibles = true;
+    try {
+        registros = JSON.parse(localStorage.getItem('frenos_registros') || '[]');
+        if (!Array.isArray(registros)) throw new Error('El formato de los registros locales no es válido.');
+    } catch (error) {
+        registrosLocalesDisponibles = false;
+        console.error('No se pudieron leer los registros locales.', error);
+        alert('No se pudieron leer los registros locales de este dispositivo. No guardes cambios hasta revisar el almacenamiento.');
+    }
+    let registroEditando = null;
+    let fotosPendientes = {};
+    let procesamientoFotoPendiente = Promise.resolve(true);
+
+    actualizarVista();
+    actualizarListasAutocompletado();
+
+    const PHOTO_DB_NAME = 'frenos_fotos_db';
+    const PHOTO_STORE_NAME = 'fotos';
+    const PHOTO_FOLDER = 'IMAGENES';
+    let photoDbPromise;
+
+    function abrirBaseFotos() {
+        if (!('indexedDB' in window)) {
+            return Promise.reject(new Error('Este navegador no permite el almacenamiento local necesario para guardar fotos.'));
+        }
+        if (!photoDbPromise) {
+            photoDbPromise = new Promise((resolve, reject) => {
+                const request = indexedDB.open(PHOTO_DB_NAME, 1);
+                request.onupgradeneeded = () => {
+                    if (!request.result.objectStoreNames.contains(PHOTO_STORE_NAME)) {
+                        request.result.createObjectStore(PHOTO_STORE_NAME, { keyPath: 'nombre' });
+                    }
+                };
+                request.onsuccess = () => {
+                    request.result.onversionchange = () => {
+                        request.result.close();
+                        photoDbPromise = null;
+                    };
+                    resolve(request.result);
+                };
+                request.onblocked = () => reject(new Error('Cerrá las otras pestañas de Frenos Móvil y volvé a intentar.'));
+                request.onerror = () => reject(request.error || new Error('No se pudo abrir el almacenamiento de fotos.'));
+            });
+        }
+        return photoDbPromise;
+    }
+
+    function persistirRegistrosLocales(registrosNuevos) {
+        if (!registrosLocalesDisponibles) {
+            alert('No se pueden guardar cambios porque no fue posible leer los registros locales. No se modificaron los datos.');
+            return false;
+        }
+        try {
+            localStorage.setItem('frenos_registros', JSON.stringify(registrosNuevos));
+            registros = registrosNuevos;
+            return true;
+        } catch (error) {
+            console.error('No se pudieron guardar los registros locales.', error);
+            alert('No se pudieron guardar los registros en este dispositivo. Revisá el espacio disponible; los cambios no se aplicaron.');
+            return false;
+        }
+    }
+
+    function guardarFotoLocal(nombre, dataUrl) {
+        return abrirBaseFotos().then(db => new Promise((resolve, reject) => {
+            const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+            transaction.objectStore(PHOTO_STORE_NAME).put({ nombre, dataUrl });
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = () => reject(transaction.error || new Error('No se pudo guardar la foto.'));
+            transaction.onabort = () => reject(transaction.error || new Error('Se canceló el guardado de la foto.'));
+        }));
+    }
+
+    function limpiarFotosLocales() {
+        return abrirBaseFotos().then(db => new Promise((resolve, reject) => {
+            const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+            transaction.objectStore(PHOTO_STORE_NAME).clear();
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = () => reject(transaction.error || new Error('No se pudieron eliminar las fotos guardadas.'));
+            transaction.onabort = () => reject(transaction.error || new Error('Se canceló la eliminación de las fotos.'));
+        }));
+    }
+
+    function leerFotosLocales() {
+        return abrirBaseFotos().then(db => new Promise((resolve, reject) => {
+            const transaction = db.transaction(PHOTO_STORE_NAME, 'readonly');
+            const request = transaction.objectStore(PHOTO_STORE_NAME).getAll();
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error || new Error('No se pudieron leer las fotos guardadas.'));
+        }));
+    }
+
+    async function cargarFotosLocales() {
+        const fotosGuardadas = await leerFotosLocales();
+        fotosGuardadas.forEach(foto => {
+            if (foto && foto.nombre && typeof foto.dataUrl === 'string') {
+                fotosPendientes[foto.nombre] = foto.dataUrl;
+            }
+        });
+
+        let fotosAntiguas = {};
+        try {
+            fotosAntiguas = JSON.parse(sessionStorage.getItem('frenos_fotos_blobs') || '{}');
+        } catch (error) {
+            console.warn('No se pudieron interpretar las fotos temporales antiguas.', error);
+        }
+        for (const [nombre, dataUrl] of Object.entries(fotosAntiguas)) {
+            if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) continue;
+            if (!fotosPendientes[nombre]) {
+                await guardarFotoLocal(nombre, dataUrl);
+                fotosPendientes[nombre] = dataUrl;
+            }
+        }
+        try {
+            sessionStorage.removeItem('frenos_fotos_blobs');
+        } catch (error) {
+            console.warn('No se pudo limpiar el almacenamiento temporal antiguo.', error);
+        }
+    }
+
+    const cargaFotosPromise = cargarFotosLocales();
+    cargaFotosPromise.then(() => actualizarVista()).catch(error => {
+        console.error(error);
+        alert('No se pudieron cargar las fotos guardadas en el celular: ' + error.message);
+    });
+
+    async function prepararAlmacenamientoLocal() {
+        const estado = document.getElementById('storageStatus');
+        try {
+            const storage = navigator.storage;
+            if (!storage || typeof storage.persist !== 'function' || typeof storage.persisted !== 'function') {
+                estado.textContent = 'Los datos se guardan en este dispositivo. Este navegador no ofrece protección contra la limpieza automática: no borres los datos del sitio y usá la app instalada.';
+                return;
+            }
+            const persistente = await storage.persisted() || await storage.persist();
+            estado.textContent = persistente
+                ? 'Registros y fotos guardados en este dispositivo con almacenamiento persistente. No se comparten entre dispositivos; usá Supabase para transferirlos.'
+                : 'Registros y fotos quedan en este dispositivo, pero Safari no confirmó protección contra limpieza automática. No borres los datos del sitio y sincronizá con Supabase.';
+        } catch (error) {
+            console.error('No se pudo solicitar almacenamiento persistente.', error);
+            estado.textContent = 'Los datos se guardan en este dispositivo, pero no se pudo confirmar su protección contra limpieza automática. Sincronizá con Supabase y no borres los datos del sitio.';
+        }
+    }
+    const prepararAlmacenamientoPromise = prepararAlmacenamientoLocal();
+
+    function ponerFechaActual() {
+        const hoy = new Date();
+        const anio = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        document.getElementById('fecha').value = `${anio}-${mes}-${dia}`;
+    }
+
+    async function iniciarNuevoDia() {
+        if (!confirm('¿Iniciar un nuevo día? Se eliminarán del celular todos los registros y fotos pendientes no sincronizados.')) {
+            return;
+        }
+
+        try {
+            localStorage.removeItem('frenos_registros');
+            try {
+                sessionStorage.removeItem('frenos_fotos_blobs');
+            } catch (error) {
+                console.warn('No se pudo limpiar el almacenamiento temporal antiguo.', error);
+            }
+            await limpiarFotosLocales();
+        } catch (error) {
+            alert('No se pudieron eliminar todos los datos locales. Revisá el almacenamiento del dispositivo e intentá nuevamente.');
+            return;
+        }
+
+        registrosLocalesDisponibles = true;
+        registros = [];
+        fotosPendientes = {};
+        registroEditando = null;
+        ['nropat', 'marca', 'cliente', 'telefono', 'operario', 'trabajo', 'rutafoto'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        document.getElementById('buscarPatente').value = '';
+        ponerFechaActual();
+        actualizarVista();
+        actualizarListasAutocompletado();
+        alert('Nuevo día iniciado. Se eliminaron los registros guardados en este celular.');
+    }
+
+    function buscarDatosPatente() {
+        const patente = document.getElementById('nropat').value.trim().toUpperCase();
+        document.getElementById('nropat').value = patente;
+        const registroExistente = patente
+            ? [...registros].reverse().find(reg => String(reg.nropat || '').trim().toUpperCase() === patente)
+            : null;
+
+        document.getElementById('marca').value = registroExistente ? (registroExistente.marca || '') : '';
+        document.getElementById('cliente').value = registroExistente ? (registroExistente.cliente || '') : '';
+        document.getElementById('telefono').value = registroExistente ? (registroExistente.telefono || '') : '';
+        document.getElementById('operario').value = registroExistente ? (registroExistente.operario || '') : '';
+        document.getElementById('trabajo').value = '';
+        document.getElementById('rutafoto').value = '';
+        ponerFechaActual();
+    }
+
+    function generarNombreFoto() {
+        const ahora = new Date();
+        const dd = String(ahora.getDate()).padStart(2, '0');
+        const mm = String(ahora.getMonth() + 1).padStart(2, '0');
+        const yyyy = ahora.getFullYear();
+        const hh = String(ahora.getHours()).padStart(2, '0');
+        const min = String(ahora.getMinutes()).padStart(2, '0');
+        const ss = String(ahora.getSeconds()).padStart(2, '0');
+        const ms = String(ahora.getMilliseconds()).padStart(3, '0');
+        const sufijo = Math.random().toString(36).slice(2, 6).toUpperCase();
+        return `${PHOTO_FOLDER}\\ORY_${dd}_${mm}_${yyyy}_${hh}_${min}_${ss}_${ms}_${sufijo}.JPG`;
+    }
+
+    function procesarImagen(event, esCamara, campoDestinoId = 'rutafoto') {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        event.target.value = '';
+
+        const nombreBase = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+        const nombreFinal = esCamara
+            ? generarNombreFoto()
+            : `${PHOTO_FOLDER}\\${nombreBase.slice(0, 25)}_${Date.now()}_${Math.random().toString(36).slice(2, 6).toUpperCase()}.JPG`;
+        const campoDestino = document.getElementById(campoDestinoId);
+        const nombreArchivoSimple = nombreFinal.split('\\').pop();
+
+        const proceso = (async () => {
+            const dataUrlOriginal = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('No se pudo leer el archivo de imagen.'));
+                reader.readAsDataURL(file);
+            });
+            const img = await new Promise((resolve, reject) => {
+                const imagen = new Image();
+                imagen.onload = () => resolve(imagen);
+                imagen.onerror = () => reject(new Error('No se pudo abrir la imagen seleccionada.'));
+                imagen.src = dataUrlOriginal;
+            });
+
+            const canvas = document.createElement('canvas');
+            const width = 800;
+            const height = 600;
+            const targetBytes = 27 * 1024;
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('No se pudo preparar la imagen para guardarla.');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            const escala = Math.max(width / img.width, height / img.height);
+            const fotoWidth = img.width * escala;
+            const fotoHeight = img.height * escala;
+            ctx.drawImage(img, (width - fotoWidth) / 2, (height - fotoHeight) / 2, fotoWidth, fotoHeight);
+
+            let minCalidad = 0.1;
+            let maxCalidad = 0.95;
+            let mejorDataUrl = '';
+            let menorDiferencia = Infinity;
+            for (let intento = 0; intento < 10; intento++) {
+                const calidad = (minCalidad + maxCalidad) / 2;
+                const dataUrl = canvas.toDataURL('image/jpeg', calidad);
+                const base64 = dataUrl.split(',')[1];
+                const padding = (base64.match(/=*$/) || [''])[0].length;
+                const pesoBytes = Math.floor(base64.length * 3 / 4) - padding;
+                const diferencia = Math.abs(pesoBytes - targetBytes);
+                if (diferencia < menorDiferencia) {
+                    menorDiferencia = diferencia;
+                    mejorDataUrl = dataUrl;
+                }
+                if (pesoBytes > targetBytes) maxCalidad = calidad;
+                else minCalidad = calidad;
+            }
+
+            await guardarFotoLocal(nombreArchivoSimple, mejorDataUrl);
+            fotosPendientes[nombreArchivoSimple] = mejorDataUrl;
+            if (campoDestino) campoDestino.value = nombreFinal;
+            actualizarVista();
+        })();
+
+        procesamientoFotoPendiente = proceso.then(() => true).catch(error => {
+            if (campoDestino) campoDestino.value = '';
+            console.error(error);
+            alert(error.message || 'No se pudo guardar la imagen en el celular.');
+            return true;
+        });
+    }
+
+    function actualizarListasAutocompletado() {
+        const marcas = [...new Set(registros.map(r => r.marca).filter(Boolean))];
+        const trabajos = [...new Set(registros.map(r => r.trabajo).filter(Boolean))];
+        const clientes = [...new Set(registros.map(r => r.cliente).filter(Boolean))];
+
+        document.getElementById('sugerenciasMarcas').innerHTML = marcas.map(m => `<option value="${m}">`).join('');
+        document.getElementById('sugerenciasTrabajos').innerHTML = trabajos.map(t => `<option value="${t}">`).join('');
+        document.getElementById('sugerenciasClientes').innerHTML = clientes.map(c => `<option value="${c}">`).join('');
+    }
+
+    async function guardarRegistro() {
+        await procesamientoFotoPendiente;
+        if (document.activeElement) { document.activeElement.blur(); }
+
+        const nropat = document.getElementById('nropat').value.trim().toUpperCase();
+        const marca = document.getElementById('marca').value.trim().toUpperCase();
+        const cliente = document.getElementById('cliente').value.trim().toUpperCase();
+        const telefono = document.getElementById('telefono').value.trim();
+        const operario = document.getElementById('operario').value.trim();
+        const fecha = document.getElementById('fecha').value;
+        const trabajo = document.getElementById('trabajo').value.trim().toUpperCase();
+        const rutafoto = document.getElementById('rutafoto').value.trim();
+
+        if (!nropat) {
+            alert("¡Atención! La patente es obligatoria.");
+            document.getElementById('nropat').focus();
+            return;
+        }
+
+        const nuevoRegistro = { nropat, marca, cliente, telefono, operario, fecha, trabajo, rutafoto };
+        if (!persistirRegistrosLocales([...registros, nuevoRegistro])) return;
+        
+        // Blanquear todos los inputs del formulario
+        document.getElementById('nropat').value = '';
+        document.getElementById('marca').value = '';
+        document.getElementById('cliente').value = '';
+        document.getElementById('telefono').value = '';
+        document.getElementById('operario').value = '';
+        document.getElementById('trabajo').value = '';
+        document.getElementById('rutafoto').value = '';
+        ponerFechaActual();
+
+        actualizarVista();
+        actualizarListasAutocompletado();
+        
+        alert("¡Registro guardado en el celular!");
+    }
+
+
+    function escaparHTML(valor) {
+        return String(valor || '').replace(/[&<>"']/g, caracter => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[caracter]);
+    }
+
+    function nombreFotoDesdeRuta(ruta) {
+        return String(ruta || '').split(/[\\/]/).pop();
+    }
+
+    function editarRegistro(index) {
+        registroEditando = registroEditando === index ? null : index;
+        actualizarVista();
+    }
+
+    function cancelarEdicion() {
+        registroEditando = null;
+        actualizarVista();
+    }
+
+    function alternarHistorialPatente(id, boton) {
+        const banner = document.getElementById(id);
+        const mostrar = banner.style.display === 'none';
+        banner.style.display = mostrar ? 'block' : 'none';
+        boton.textContent = mostrar ? 'Ocultar historial' : 'Ver historial';
+    }
+
+   async function guardarEdicion(index) {
+        await procesamientoFotoPendiente;
+        const nropat = document.getElementById(`edit-nropat-${index}`).value.trim().toUpperCase();
+        if (!nropat) {
+            alert('La patente es obligatoria.');
+            document.getElementById(`edit-nropat-${index}`).focus();
+            return;
+        }
+
+        const registroAnterior = registros[index] || {};
+        const registroActualizado = {
+            ...registroAnterior,
+            nropat,
+            marca: document.getElementById(`edit-marca-${index}`).value.trim().toUpperCase(),
+            cliente: document.getElementById(`edit-cliente-${index}`).value.trim().toUpperCase(),
+            telefono: document.getElementById(`edit-telefono-${index}`).value.trim(),
+            operario: document.getElementById(`edit-operario-${index}`).value.trim(),
+            fecha: document.getElementById(`edit-fecha-${index}`).value,
+            trabajo: document.getElementById(`edit-trabajo-${index}`).value.trim().toUpperCase(),
+            rutafoto: document.getElementById(`edit-rutafoto-${index}`).value.trim()
+        };
+        const registrosActualizados = registros.slice();
+        registrosActualizados[index] = registroActualizado;
+        if (!persistirRegistrosLocales(registrosActualizados)) return;
+        registroEditando = null;
+        actualizarVista();
+        actualizarListasAutocompletado();
+        alert('Cambios guardados en el celular.');
+    }
+
+    function eliminarRegistro(index) {
+        if (confirm("¿Estás seguro de eliminar este registro?")) {
+            const registrosActualizados = registros.slice();
+            registrosActualizados.splice(index, 1);
+            if (!persistirRegistrosLocales(registrosActualizados)) return;
+            actualizarVista();
+            actualizarListasAutocompletado();
+        }
+    }
+
+    function actualizarVista() {
+        const contenedor = document.getElementById('listaRegistros');
+        const filtro = (document.getElementById('buscarPatente').value || '').trim().toUpperCase();
+        const coincidencias = registros.map((reg, index) => ({ reg, index }))
+            .filter(item => String(item.reg.nropat || '').toUpperCase().includes(filtro));
+        const patentes = new Map();
+        coincidencias.forEach(item => {
+            const patente = String(item.reg.nropat || '').trim().toUpperCase() || 'SIN PATENTE';
+            if (!patentes.has(patente)) patentes.set(patente, []);
+            patentes.get(patente).push(item);
+        });
+        document.getElementById('contador').innerText = patentes.size;
+        
+        if (registros.length === 0) {
+            contenedor.innerHTML = '<div class="empty-msg">No hay registros cargados aún.</div>';
+            return;
+        }
+        if (coincidencias.length === 0) {
+            contenedor.innerHTML = '<div class="empty-msg">No se encontraron trabajos para esa patente.</div>';
+            return;
+        }
+
+        contenedor.innerHTML = '';
+        let grupoId = 0;
+        patentes.forEach((trabajos, patente) => {
+            const historial = trabajos.slice().sort((a, b) => String(b.reg.fecha || '').localeCompare(String(a.reg.fecha || '')));
+            const idBanner = `historial-patente-${grupoId++}`;
+            const marcas = [...new Set(historial.map(item => String(item.reg.marca || '').trim()).filter(Boolean))];
+            contenedor.innerHTML += `<section class="patent-group"><h4>${escaparHTML(patente)} <span>${historial.length} ${historial.length === 1 ? 'trabajo' : 'trabajos'}</span></h4>`;
+            if (historial.length > 1) {
+                const entradas = historial.map(({reg}) => {
+                    const ruta = String(reg.rutafoto || '');
+                    const nombreFoto = ruta.split(String.fromCharCode(92)).join('/').split('/').pop();
+                    const foto = fotosPendientes[nombreFoto];
+                    const miniatura = typeof foto === 'string' && foto.startsWith('data:image/')
+                        ? `<img src="${escaparHTML(foto)}" alt="Foto del trabajo ${escaparHTML(reg.fecha || '')}">`
+                        : '<div class="history-no-photo">Foto no disponible</div>';
+                    return `<div class="history-entry">${miniatura}<div class="history-details"><strong>Fecha:</strong> ${escaparHTML(reg.fecha || '-')}<br><strong>Trabajo:</strong> ${escaparHTML(reg.trabajo || '-')}</div></div>`;
+                }).join('');
+                contenedor.innerHTML += `<button type="button" class="btn btn-history" onclick="alternarHistorialPatente('${idBanner}', this)">Ver historial</button><div id="${idBanner}" class="history-banner" style="display:none"><h5>Informe de trabajos</h5><div class="history-brand"><strong>Patente:</strong> ${escaparHTML(patente)}<br><strong>Marca:</strong> ${marcas.length ? marcas.map(escaparHTML).join(', ') : 'Sin marca registrada'}</div>${entradas}</div>`;
+            }
+            historial.forEach(({ reg, index }) => {
+                const nombreFoto = nombreFotoDesdeRuta(reg.rutafoto);
+                const foto = fotosPendientes[nombreFoto];
+                const miniatura = typeof foto === 'string' && foto.startsWith('data:image/')
+                    ? `<img class="record-photo" src="${escaparHTML(foto)}" alt="Miniatura de ${escaparHTML(nombreFoto)}">`
+                    : '';
+                contenedor.innerHTML += `
+                <div class="record-item">
+                    <strong>${escaparHTML(reg.marca || 'Sin marca')}</strong><br>
+                    ${miniatura}
+                    <strong>Cliente:</strong> ${escaparHTML(reg.cliente || '-')} | <strong>Tel:</strong> ${escaparHTML(reg.telefono || '-')}<br>
+                    <strong>Operario:</strong> ${escaparHTML(reg.operario || '-')}<br>
+                    <strong>Fecha:</strong> ${escaparHTML(reg.fecha)} | <strong>Trabajo:</strong> ${escaparHTML(reg.trabajo || '-')}<br>
+                    <strong>Imágenes:</strong> ${escaparHTML(reg.rutafoto || 'Sin foto')}<br>
+                    <button type="button" class="btn btn-edit" onclick="editarRegistro(${index})">${registroEditando === index ? 'Cerrar edición' : 'Editar'}</button>
+                    <button type="button" class="btn btn-delete" onclick="eliminarRegistro(${index})">Eliminar</button>
+                    ${registroEditando === index ? `
+                    <div class="edit-form">
+                      <label>Patente</label><input id="edit-nropat-${index}" maxlength="10" value="${escaparHTML(reg.nropat)}">
+                      <label>Marca</label><input id="edit-marca-${index}" maxlength="30" value="${escaparHTML(reg.marca)}">
+                      <label>Cliente</label><input id="edit-cliente-${index}" maxlength="40" value="${escaparHTML(reg.cliente)}">
+                      <label>Teléfono</label><input id="edit-telefono-${index}" maxlength="20" value="${escaparHTML(reg.telefono)}">
+                      <label>Operario (nombre completo)</label><input id="edit-operario-${index}" maxlength="80" value="${escaparHTML(reg.operario || '')}">
+                      <label>Fecha</label><input id="edit-fecha-${index}" type="date" value="${escaparHTML(reg.fecha)}">
+                      <label>Trabajo</label><input id="edit-trabajo-${index}" maxlength="100" value="${escaparHTML(reg.trabajo)}">
+                      <label>Ruta de imagen</label><input id="edit-rutafoto-${index}" maxlength="150" value="${escaparHTML(reg.rutafoto)}">
+                      <input id="edit-camara-${index}" type="file" accept="image/*" capture="environment" style="display:none" onchange="procesarImagen(event, true, 'edit-rutafoto-${index}')">
+                      <input id="edit-galeria-${index}" type="file" accept="image/*" style="display:none" onchange="procesarImagen(event, false, 'edit-rutafoto-${index}')">
+                      <div class="btn-group-foto">
+                        <button type="button" class="btn btn-camera" onclick="document.getElementById('edit-camara-${index}').click()">📷 Tomar foto</button>
+                        <button type="button" class="btn btn-gallery" onclick="document.getElementById('edit-galeria-${index}').click()">📂 Buscar foto</button>
+                      </div>
+                      <button type="button" class="btn btn-primary" onclick="guardarEdicion(${index})">Guardar cambios</button>
+                      <button type="button" class="btn btn-gallery" onclick="cancelarEdicion()">Cancelar</button>
+                    </div>` : ''}
+                </div>
+            `;
+            });
+            contenedor.innerHTML += '</section>';
+        });
+    }
+
+    function dataURItoBlob(dataURI) {
+        const byteString = atob(dataURI.split(',')[1]);
+        const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ab], { type: mimeString });
+    }
+
+    async function sincronizarConSupabase() {
+        if (!supabaseClient) { alert('Supabase no está disponible. Conectate a internet y volvé a cargar la página.'); return; }
+        if (registros.length === 0) { alert('No hay registros para sincronizar.'); return; }
+        try {
+            await prepararAlmacenamientoPromise;
+            await cargaFotosPromise;
+            await procesamientoFotoPendiente;
+            const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError) throw new Error('No se pudo comprobar la sesión de Supabase: ' + sessionError.message);
+            if (!sessionData.session) { alert('Primero ingresá a Supabase con el botón “Conectar a Supabase”.'); return; }
+            if (!confirm('Se enviarán a Supabase los registros guardados en este teléfono y sus fotos. ¿Continuar?')) return;
+
+            const paraEnviar = registros.map(reg => {
+                if (!reg.mobile_id) reg.mobile_id = (crypto.randomUUID ? crypto.randomUUID() : ('m' + Date.now() + Math.random().toString(16).slice(2)));
+                return reg;
+            });
+            if (!persistirRegistrosLocales(registros)) return;
+
+            const fotosNecesarias = new Map();
+            for (const reg of paraEnviar) {
+                const nombreFoto = nombreFotoDesdeRuta(reg.rutafoto);
+                if (!nombreFoto) continue;
+                const dataUrl = fotosPendientes[nombreFoto];
+                if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
+                    throw new Error(`Falta la imagen local "${nombreFoto}" del registro ${reg.nropat || '(sin patente)'}. No se enviaron los registros.`);
+                }
+                const nombreSeguro = nombreFoto.replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 60);
+                const fotoExistente = fotosNecesarias.get(nombreSeguro);
+                if (fotoExistente && fotoExistente !== dataUrl) {
+                    throw new Error(`Dos fotos distintas usan el mismo nombre "${nombreSeguro}". Renombrá o volvé a tomar una de las fotos antes de sincronizar.`);
+                }
+                fotosNecesarias.set(nombreSeguro, dataUrl);
+            }
+
+            for (const [nombreSeguro, dataUrl] of fotosNecesarias) {
+                const blobFoto = dataURItoBlob(dataUrl);
+                const { error: fotoError } = await supabaseClient.storage.from('tallerfrenos')
+                    .upload(sessionData.session.user.id + '/IMAGENES/' + nombreSeguro, blobFoto, { contentType: 'image/jpeg', upsert: true });
+                if (fotoError) throw new Error('No se pudo subir la foto ' + nombreSeguro + ': ' + fotoError.message);
+            }
+
+            // Campos con los nombres y longitudes compatibles con PATENTES.DBF.
+            const filas = paraEnviar.map(reg => ({
+                mobile_id: reg.mobile_id,
+                owner_id: sessionData.session.user.id,
+                nropat: String(reg.nropat || '').toUpperCase().slice(0, 11),
+                marca: String(reg.marca || '').toUpperCase().slice(0, 40),
+                trabajo: String(reg.trabajo || '').toUpperCase().slice(0, 60),
+                fecha: reg.fecha || null,
+                imagenes: nombreFotoDesdeRuta(reg.rutafoto).replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 60),
+                cliente: String(reg.cliente || '').toUpperCase().slice(0, 40),
+                telefono: String(reg.telefono || '').slice(0, 15),
+                operario: String(reg.operario || '').trim().slice(0, 80)
+            }));
+            const { error: filaError } = await supabaseClient.from('patentes_sync').upsert(filas, { onConflict: 'mobile_id' });
+            if (filaError) throw new Error('No se pudieron guardar los registros: ' + filaError.message);
+
+            alert(`Sincronización completada: ${filas.length} registros y ${fotosNecesarias.size} fotos subidos a Supabase. Los datos siguen guardados en el celular hasta que se importen en la PC.`);
+        } catch (error) {
+            console.error(error);
+            alert('La sincronización no terminó correctamente. No se borró ningún registro local. Detalle: ' + (error.message || error));
+        }
+    }
+
+    let deferredInstallPrompt = null;
+    const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const pwaStatus = document.getElementById('pwaStatus');
+
+    function esAplicacionInstalada() {
+        return navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    }
+
+    async function instalarAplicacion() {
+        if (esAplicacionInstalada()) {
+            alert('Frenos Móvil ya está abierto como una app instalada.');
+            return;
+        }
+        if (deferredInstallPrompt) {
+            await deferredInstallPrompt.prompt();
+            const resultado = await deferredInstallPrompt.userChoice;
+            pwaStatus.textContent = resultado.outcome === 'accepted'
+                ? 'Instalación aceptada. Buscá Frenos Móvil en la pantalla de inicio.'
+                : 'Instalación cancelada; podés intentarlo nuevamente desde este botón.';
+            deferredInstallPrompt = null;
+            return;
+        }
+        if (esIOS) {
+            alert('En el iPhone: abrí esta página en Safari, tocá Compartir y elegí “Agregar a pantalla de inicio”. Luego abrí Frenos Móvil desde ese ícono.');
+            return;
+        }
+        alert('Abrí el menú de Safari o del navegador y elegí “Agregar a pantalla de inicio” o “Instalar aplicación”.');
+    }
+
+    window.addEventListener('beforeinstallprompt', event => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        pwaStatus.textContent = 'Este navegador permite instalar Frenos Móvil desde el botón de arriba.';
+    });
+    window.addEventListener('appinstalled', () => {
+        pwaStatus.textContent = 'Frenos Móvil quedó instalado en este dispositivo.';
+        deferredInstallPrompt = null;
+    });
+
+    if (esAplicacionInstalada()) {
+        pwaStatus.textContent = 'Frenos Móvil está abierto como app instalada en este dispositivo.';
+    } else if (esIOS) {
+        pwaStatus.textContent = 'En iPhone: usá Safari → Compartir → Agregar a pantalla de inicio.';
+    }
+
+    if ('serviceWorker' in navigator && window.isSecureContext) {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(() => {
+                if (!esAplicacionInstalada() && !esIOS && !deferredInstallPrompt) {
+                    pwaStatus.textContent = 'PWA lista. Para instalar, usá el menú del navegador o el botón de arriba.';
+                }
+            })
+            .catch(error => {
+                console.error('No se pudo registrar la aplicación offline.', error);
+                pwaStatus.textContent = 'No se pudo activar el modo offline. Revisá que el sitio esté publicado mediante HTTPS.';
+            });
+    } else {
+        pwaStatus.textContent = 'La instalación y el modo offline requieren publicar este sitio mediante HTTPS.';
+    }
+
+</script>
+
+</body>
+</html>
