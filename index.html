@@ -146,8 +146,8 @@
         <input type="file" id="inputGaleria" accept="image/*" style="display: none;" onchange="procesarImagen(event, false)">
 
         <div class="btn-group-foto">
-            <button type="button" class="btn btn-camera" onclick="document.getElementById('inputCamara').click()">📷 Tomar Foto</button>
-            <button type="button" class="btn btn-gallery" onclick="document.getElementById('inputGaleria').click()">📂 Buscar Foto</button>
+            <button type="button" class="btn btn-camera" onclick="abrirSelectorImagen('inputCamara')">📷 Tomar Foto</button>
+            <button type="button" class="btn btn-gallery" onclick="abrirSelectorImagen('inputGaleria')">📂 Buscar Foto</button>
         </div>
     </div>
 
@@ -236,6 +236,8 @@
     const PHOTO_DB_NAME = 'frenos_fotos_db';
     const PHOTO_STORE_NAME = 'fotos';
     const PHOTO_FOLDER = 'IMAGENES';
+    const FORM_DRAFT_KEY = 'frenos_formulario_borrador';
+    const FORM_FIELD_IDS = ['nropat', 'marca', 'cliente', 'operario', 'telefono', 'fecha', 'trabajo', 'rutafoto'];
     let photoDbPromise;
 
     function abrirBaseFotos() {
@@ -280,6 +282,71 @@
         }
     }
 
+    function guardarBorradorFormulario() {
+        try {
+            const borrador = {};
+            FORM_FIELD_IDS.forEach(id => {
+                borrador[id] = document.getElementById(id).value;
+            });
+            localStorage.setItem(FORM_DRAFT_KEY, JSON.stringify(borrador));
+            return true;
+        } catch (error) {
+            console.error('No se pudo guardar el borrador del formulario.', error);
+            return false;
+        }
+    }
+
+    function restaurarBorradorFormulario() {
+        try {
+            const borrador = JSON.parse(localStorage.getItem(FORM_DRAFT_KEY) || 'null');
+            if (!borrador || typeof borrador !== 'object' || Array.isArray(borrador)) return;
+            FORM_FIELD_IDS.forEach(id => {
+                if (typeof borrador[id] === 'string') {
+                    document.getElementById(id).value = borrador[id];
+                }
+            });
+        } catch (error) {
+            console.error('No se pudo recuperar el borrador del formulario.', error);
+        }
+    }
+
+    function limpiarBorradorFormulario() {
+        try {
+            localStorage.removeItem(FORM_DRAFT_KEY);
+        } catch (error) {
+            console.error('No se pudo limpiar el borrador guardado.', error);
+        }
+    }
+
+    function abrirSelectorImagen(inputId) {
+        if (!guardarBorradorFormulario()) {
+            alert('No se pudo guardar un borrador de los campos. Para evitar perderlos, no abras la cámara hasta liberar espacio en el almacenamiento.');
+            return;
+        }
+        document.getElementById(inputId).click();
+    }
+
+    FORM_FIELD_IDS.forEach(id => {
+        const campo = document.getElementById(id);
+        campo.addEventListener('input', guardarBorradorFormulario);
+        campo.addEventListener('change', guardarBorradorFormulario);
+    });
+    window.addEventListener('pagehide', guardarBorradorFormulario);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') guardarBorradorFormulario();
+    });
+    restaurarBorradorFormulario();
+
+    function guardarFotoOriginalLocal(nombre, archivo) {
+        return abrirBaseFotos().then(db => new Promise((resolve, reject) => {
+            const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+            transaction.objectStore(PHOTO_STORE_NAME).put({ nombre, archivo });
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = () => reject(transaction.error || new Error('No se pudo respaldar la foto seleccionada.'));
+            transaction.onabort = () => reject(transaction.error || new Error('Se canceló el respaldo de la foto.'));
+        }));
+    }
+
     function guardarFotoLocal(nombre, dataUrl) {
         return abrirBaseFotos().then(db => new Promise((resolve, reject) => {
             const transaction = db.transaction(PHOTO_STORE_NAME, 'readwrite');
@@ -311,11 +378,15 @@
 
     async function cargarFotosLocales() {
         const fotosGuardadas = await leerFotosLocales();
-        fotosGuardadas.forEach(foto => {
+        for (const foto of fotosGuardadas) {
             if (foto && foto.nombre && typeof foto.dataUrl === 'string') {
                 fotosPendientes[foto.nombre] = foto.dataUrl;
+            } else if (foto && foto.nombre && foto.archivo instanceof Blob) {
+                const dataUrl = await optimizarImagen(foto.archivo);
+                await guardarFotoLocal(foto.nombre, dataUrl);
+                fotosPendientes[foto.nombre] = dataUrl;
             }
-        });
+        }
 
         let fotosAntiguas = {};
         try {
@@ -377,6 +448,7 @@
 
         try {
             localStorage.removeItem('frenos_registros');
+            limpiarBorradorFormulario();
             try {
                 sessionStorage.removeItem('frenos_fotos_blobs');
             } catch (error) {
@@ -416,6 +488,7 @@
         document.getElementById('trabajo').value = '';
         document.getElementById('rutafoto').value = '';
         ponerFechaActual();
+        guardarBorradorFormulario();
     }
 
     function generarNombreFoto() {
@@ -431,36 +504,43 @@
         return `${PHOTO_FOLDER}\\ORY_${dd}_${mm}_${yyyy}_${hh}_${min}_${ss}_${ms}_${sufijo}.JPG`;
     }
 
-    function procesarImagen(event, esCamara, campoDestinoId = 'rutafoto') {
-        const file = event.target.files && event.target.files[0];
-        if (!file) return;
-        event.target.value = '';
+    function blobADataUrl(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('No se pudo preparar la foto optimizada.'));
+            reader.readAsDataURL(blob);
+        });
+    }
 
-        const nombreBase = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_\-\.]/g, '_');
-        const nombreFinal = esCamara
-            ? generarNombreFoto()
-            : `${PHOTO_FOLDER}\\${nombreBase.slice(0, 25)}_${Date.now()}_${Math.random().toString(36).slice(2, 6).toUpperCase()}.JPG`;
-        const campoDestino = document.getElementById(campoDestinoId);
-        const nombreArchivoSimple = nombreFinal.split('\\').pop();
+    function convertirCanvasABlob(canvas, calidad) {
+        return new Promise((resolve, reject) => {
+            if (typeof canvas.toBlob !== 'function') {
+                reject(new Error('Este navegador no permite optimizar la foto de forma segura.'));
+                return;
+            }
+            canvas.toBlob(blob => {
+                if (blob) resolve(blob);
+                else reject(new Error('No se pudo convertir la foto a JPEG.'));
+            }, 'image/jpeg', calidad);
+        });
+    }
 
-        const proceso = (async () => {
-            const dataUrlOriginal = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(new Error('No se pudo leer el archivo de imagen.'));
-                reader.readAsDataURL(file);
-            });
+    async function optimizarImagen(file) {
+        const imageUrl = URL.createObjectURL(file);
+        let canvas;
+        try {
             const img = await new Promise((resolve, reject) => {
                 const imagen = new Image();
                 imagen.onload = () => resolve(imagen);
                 imagen.onerror = () => reject(new Error('No se pudo abrir la imagen seleccionada.'));
-                imagen.src = dataUrlOriginal;
+                imagen.src = imageUrl;
             });
 
-            const canvas = document.createElement('canvas');
             const width = 800;
             const height = 600;
             const targetBytes = 27 * 1024;
+            canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
@@ -474,34 +554,65 @@
 
             let minCalidad = 0.1;
             let maxCalidad = 0.95;
-            let mejorDataUrl = '';
+            let mejorBlob = null;
             let menorDiferencia = Infinity;
             for (let intento = 0; intento < 10; intento++) {
                 const calidad = (minCalidad + maxCalidad) / 2;
-                const dataUrl = canvas.toDataURL('image/jpeg', calidad);
-                const base64 = dataUrl.split(',')[1];
-                const padding = (base64.match(/=*$/) || [''])[0].length;
-                const pesoBytes = Math.floor(base64.length * 3 / 4) - padding;
-                const diferencia = Math.abs(pesoBytes - targetBytes);
+                const blob = await convertirCanvasABlob(canvas, calidad);
+                const diferencia = Math.abs(blob.size - targetBytes);
                 if (diferencia < menorDiferencia) {
                     menorDiferencia = diferencia;
-                    mejorDataUrl = dataUrl;
+                    mejorBlob = blob;
                 }
-                if (pesoBytes > targetBytes) maxCalidad = calidad;
+                if (blob.size > targetBytes) maxCalidad = calidad;
                 else minCalidad = calidad;
             }
+            if (!mejorBlob) throw new Error('No se pudo optimizar la imagen.');
+            return await blobADataUrl(mejorBlob);
+        } finally {
+            URL.revokeObjectURL(imageUrl);
+            if (canvas) {
+                canvas.width = 0;
+                canvas.height = 0;
+            }
+        }
+    }
 
-            await guardarFotoLocal(nombreArchivoSimple, mejorDataUrl);
-            fotosPendientes[nombreArchivoSimple] = mejorDataUrl;
-            if (campoDestino) campoDestino.value = nombreFinal;
+    function procesarImagen(event, esCamara, campoDestinoId = 'rutafoto') {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        event.target.value = '';
+
+        const nombreBase = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+        const nombreFinal = esCamara
+            ? generarNombreFoto()
+            : `${PHOTO_FOLDER}\\${nombreBase.slice(0, 25)}_${Date.now()}_${Math.random().toString(36).slice(2, 6).toUpperCase()}.JPG`;
+        const campoDestino = document.getElementById(campoDestinoId);
+        const nombreArchivoSimple = nombreFinal.split('\\').pop();
+        if (campoDestino) {
+            campoDestino.value = nombreFinal;
+            if (campoDestinoId === 'rutafoto') guardarBorradorFormulario();
+        }
+
+        let fotoOriginalGuardada = false;
+        const proceso = (async () => {
+            await guardarFotoOriginalLocal(nombreArchivoSimple, file);
+            fotoOriginalGuardada = true;
+            const dataUrl = await optimizarImagen(file);
+            await guardarFotoLocal(nombreArchivoSimple, dataUrl);
+            fotosPendientes[nombreArchivoSimple] = dataUrl;
+            if (campoDestinoId === 'rutafoto') guardarBorradorFormulario();
             actualizarVista();
         })();
 
         procesamientoFotoPendiente = proceso.then(() => true).catch(error => {
-            if (campoDestino) campoDestino.value = '';
+            if (!fotoOriginalGuardada && campoDestino) {
+                campoDestino.value = '';
+                if (campoDestinoId === 'rutafoto') guardarBorradorFormulario();
+            }
             console.error(error);
             alert(error.message || 'No se pudo guardar la imagen en el celular.');
-            return true;
+            return false;
         });
     }
 
@@ -516,7 +627,7 @@
     }
 
     async function guardarRegistro() {
-        await procesamientoFotoPendiente;
+        if (!(await procesamientoFotoPendiente)) return;
         if (document.activeElement) { document.activeElement.blur(); }
 
         const nropat = document.getElementById('nropat').value.trim().toUpperCase();
@@ -546,6 +657,7 @@
         document.getElementById('trabajo').value = '';
         document.getElementById('rutafoto').value = '';
         ponerFechaActual();
+        limpiarBorradorFormulario();
 
         actualizarVista();
         actualizarListasAutocompletado();
@@ -582,7 +694,7 @@
     }
 
    async function guardarEdicion(index) {
-        await procesamientoFotoPendiente;
+        if (!(await procesamientoFotoPendiente)) return;
         const nropat = document.getElementById(`edit-nropat-${index}`).value.trim().toUpperCase();
         if (!nropat) {
             alert('La patente es obligatoria.');
@@ -721,7 +833,9 @@
         try {
             await prepararAlmacenamientoPromise;
             await cargaFotosPromise;
-            await procesamientoFotoPendiente;
+            if (!(await procesamientoFotoPendiente)) {
+                throw new Error('No se pudo completar el guardado de la foto. Revisá la imagen antes de sincronizar.');
+            }
             const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
             if (sessionError) throw new Error('No se pudo comprobar la sesión de Supabase: ' + sessionError.message);
             if (!sessionData.session) { alert('Primero ingresá a Supabase con el botón “Conectar a Supabase”.'); return; }
