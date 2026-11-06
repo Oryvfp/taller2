@@ -1,4 +1,4 @@
-const CACHE_NAME = 'frenos-movil-shell-v1';
+const CACHE_NAME = 'frenos-movil-shell-v2';
 const APP_ROOT = self.registration.scope;
 const APP_URL = new URL('insertpatentes.html', APP_ROOT).href;
 const SHELL_URLS = [

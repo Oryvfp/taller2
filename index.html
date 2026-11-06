@@ -22,6 +22,43 @@
             --card-bg: #ffffff;
             --text-color: #333333;
             --border-color: #ced4da;
+            --muted-color: #495057;
+            --subtle-color: #6c757d;
+            --input-bg: #ffffff;
+            --soft-bg: #f8f9fa;
+            --panel-bg: #ffffff;
+            --panel-border: #d9e2ec;
+            --list-border: #e9ecef;
+            --status-bg: #eef5fc;
+            --status-text: #23496b;
+            --status-border: #b8cce0;
+            --history-border: #d5e1ec;
+            --placeholder-bg: #e1e5e9;
+            --placeholder-text: #6c757d;
+            --placeholder-color: #6c757d;
+            color-scheme: light;
+        }
+
+        :root[data-theme="dark"] {
+            --bg-color: #121820;
+            --card-bg: #1e2732;
+            --text-color: #e7edf5;
+            --border-color: #465363;
+            --muted-color: #c1ccda;
+            --subtle-color: #a7b3c2;
+            --input-bg: #253140;
+            --soft-bg: #252f3b;
+            --panel-bg: #202a36;
+            --panel-border: #415165;
+            --list-border: #384454;
+            --status-bg: #1f3447;
+            --status-text: #c4ddf2;
+            --status-border: #385572;
+            --history-border: #385572;
+            --placeholder-bg: #3a4653;
+            --placeholder-text: #c1ccda;
+            --placeholder-color: #a7b3c2;
+            color-scheme: dark;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,12 +79,19 @@
 
         h2 { text-align: center; color: var(--primary-color); margin-bottom: 14px; font-size: 20px; letter-spacing: 0.5px; }
         .form-group { margin-bottom: 10px; }
-        label { display: block; font-weight: 600; font-size: 12px; margin-bottom: 4px; color: #495057; text-transform: uppercase; }
+        .theme-control { display: flex; justify-content: flex-end; align-items: center; gap: 9px; margin-bottom: 8px; color: var(--muted-color); font-size: 12px; font-weight: 600; }
+        .theme-switch { width: 48px; height: 28px; padding: 3px; border: 0; border-radius: 999px; background: #adb5bd; cursor: pointer; transition: background-color 0.2s; }
+        .theme-switch[aria-checked="true"] { background: var(--primary-color); }
+        .theme-switch:focus-visible { outline: 3px solid rgba(0, 86, 179, 0.35); outline-offset: 2px; }
+        .theme-switch-thumb { display: block; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 0.2s; }
+        .theme-switch[aria-checked="true"] .theme-switch-thumb { transform: translateX(20px); }
+        label { display: block; font-weight: 600; font-size: 12px; margin-bottom: 4px; color: var(--muted-color); text-transform: uppercase; }
 
         input[type="text"], input[type="date"] {
             width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
-            border-radius: 8px; font-size: 16px; background-color: #fff; color: var(--text-color);
+            border-radius: 8px; font-size: 16px; background-color: var(--input-bg); color: var(--text-color);
         }
+        input::placeholder { color: var(--placeholder-color); opacity: 1; }
         input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15); }
 
         .btn-group-foto { display: flex; gap: 8px; margin-top: 6px; }
@@ -67,34 +111,40 @@
         .btn-delete { background-color: var(--danger-color); color: white; padding: 5px 10px; font-size: 11px; border-radius: 6px; width: auto; margin-top: 6px; }
         .btn-edit { background-color: #f0ad4e; color: #212529; padding: 5px 10px; font-size: 11px; border-radius: 6px; width: auto; margin-top: 6px; }
         .btn-install { background-color: #343a40; color: white; margin: 0 0 12px; }
-        .app-status { padding: 9px; margin: 0 0 10px; border-radius: 7px; background: #eef5fc; color: #23496b; font-size: 12px; line-height: 1.4; }
-        .edit-form { margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ced4da; border-radius: 8px; }
+        .app-status { padding: 9px; margin: 0 0 10px; border-radius: 7px; background: var(--status-bg); color: var(--status-text); font-size: 12px; line-height: 1.4; }
+        .edit-form { margin-top: 10px; padding: 10px; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; }
         .edit-form input { width: 100%; padding: 9px; margin: 4px 0 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; }
 
-        .record-list { margin-top: 20px; border-top: 1px solid #e9ecef; padding-top: 14px; }
-        .record-list h3 { font-size: 15px; margin-bottom: 10px; color: #495057; display: flex; justify-content: space-between; align-items: center; }
+        .record-list { margin-top: 20px; border-top: 1px solid var(--list-border); padding-top: 14px; }
+        .record-list h3 { font-size: 15px; margin-bottom: 10px; color: var(--muted-color); display: flex; justify-content: space-between; align-items: center; }
         .search-patent { margin-bottom: 12px; }
-        .patent-group { margin-bottom: 14px; padding: 10px; border: 1px solid #d9e2ec; border-radius: 9px; background: #fff; }
+        .patent-group { margin-bottom: 14px; padding: 10px; border: 1px solid var(--panel-border); border-radius: 9px; background: var(--panel-bg); }
         .patent-group h4 { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; color:var(--primary-color); font-size:15px; }
-        .patent-group h4 span { color:#6c757d; font-size:11px; font-weight:normal; }
+        .patent-group h4 span { color:var(--subtle-color); font-size:11px; font-weight:normal; }
         .btn-history { background:#343a40; color:white; margin:0 0 10px; padding:9px; font-size:13px; }
-        .history-banner { padding:12px; margin:0 0 10px; border:1px solid #b8cce0; border-radius:8px; background:#eef5fc; }
-        .history-banner h5 { margin-bottom:8px; color:#23496b; font-size:14px; }
+        .history-banner { padding:12px; margin:0 0 10px; border:1px solid var(--status-border); border-radius:8px; background:var(--status-bg); }
+        .history-banner h5 { margin-bottom:8px; color:var(--status-text); font-size:14px; }
         .history-brand { margin-bottom:10px; font-size:12px; }
-        .history-entry { display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid #d5e1ec; font-size:12px; }
-        .history-entry img { width:64px; height:64px; object-fit:cover; border-radius:6px; background:#e1e5e9; }
-        .history-no-photo { width:64px; height:64px; flex:0 0 64px; display:flex; align-items:center; justify-content:center; border-radius:6px; background:#e1e5e9; color:#6c757d; font-size:10px; text-align:center; }
+        .history-entry { display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--history-border); font-size:12px; }
+        .history-entry img { width:64px; height:64px; object-fit:cover; border-radius:6px; background:var(--placeholder-bg); }
+        .history-no-photo { width:64px; height:64px; flex:0 0 64px; display:flex; align-items:center; justify-content:center; border-radius:6px; background:var(--placeholder-bg); color:var(--placeholder-text); font-size:10px; text-align:center; }
         .history-details { flex:1; min-width:0; }
         .badge { background-color: var(--primary-color); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; }
-        .record-item { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--primary-color); font-size: 12px; word-break: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .record-item { background: var(--soft-bg); padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--primary-color); font-size: 12px; word-break: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .record-item strong { color: var(--primary-color); font-size: 13px; }
-        .record-photo { display: block; width: 96px; height: 72px; object-fit: cover; border-radius: 6px; margin: 8px 0; background: #e1e5e9; }
-        .empty-msg { text-align: center; color: #6c757d; font-style: italic; font-size: 13px; padding: 8px; }
+        .record-photo { display: block; width: 96px; height: 72px; object-fit: cover; border-radius: 6px; margin: 8px 0; background: var(--placeholder-bg); }
+        .empty-msg { text-align: center; color: var(--subtle-color); font-style: italic; font-size: 13px; padding: 8px; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="theme-control">
+        <span id="themeLabel">Modo claro</span>
+        <button type="button" id="themeToggle" class="theme-switch" role="switch" aria-checked="false" aria-label="Activar modo oscuro">
+            <span class="theme-switch-thumb" aria-hidden="true"></span>
+        </button>
+    </div>
     <h2>FRENOS MÓVIL (Supabase)</h2>
     <div id="storageStatus" class="app-status" role="status" aria-live="polite">Preparando el almacenamiento local de este dispositivo…</div>
     <button type="button" class="btn btn-install" onclick="instalarAplicacion()">Instalar / agregar a inicio</button>
@@ -176,6 +226,38 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+    const THEME_STORAGE_KEY = 'frenos_tema';
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
+    function aplicarTema(tema, guardar = false) {
+        const esOscuro = tema === 'dark';
+        document.documentElement.dataset.theme = esOscuro ? 'dark' : 'light';
+        themeToggle.setAttribute('aria-checked', String(esOscuro));
+        themeToggle.setAttribute('aria-label', esOscuro ? 'Activar modo claro' : 'Activar modo oscuro');
+        themeLabel.textContent = esOscuro ? 'Modo oscuro' : 'Modo claro';
+        themeColorMeta.content = esOscuro ? '#121820' : '#0056b3';
+        if (guardar) {
+            try {
+                localStorage.setItem(THEME_STORAGE_KEY, esOscuro ? 'dark' : 'light');
+            } catch (error) {
+                console.warn('No se pudo guardar la preferencia de tema.', error);
+            }
+        }
+    }
+
+    let temaGuardado = 'light';
+    try {
+        temaGuardado = localStorage.getItem(THEME_STORAGE_KEY) || 'light';
+    } catch (error) {
+        console.warn('No se pudo leer la preferencia de tema.', error);
+    }
+    aplicarTema(temaGuardado);
+    themeToggle.addEventListener('click', () => {
+        aplicarTema(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true);
+    });
+
     // URL y clave PUBLICABLE del proyecto. No se incluye ninguna clave secreta.
     const SUPABASE_URL = 'https://ejvzlmpwgwdwpbhouqol.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_BSHeTWPgQsKNn4DJFR4kSw_H8J9rxQG';
