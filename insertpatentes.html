@@ -10,8 +10,9 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" href="./images/LOGO.png">
     <link rel="apple-touch-icon" href="./images/LOGO.png">
-    <title>FRENOS Móvil - Supabase</title>
+    <title>Panel de Carga de Autos</title>
     <style>
+     
         :root {
             --primary-color: #0056b3;
             --primary-hover: #004085;
@@ -23,6 +24,7 @@
             --text-color: #333333;
             --border-color: #ced4da;
             --muted-color: #495057;
+            --label-color: var(--muted-color);
             --subtle-color: #6c757d;
             --input-bg: #ffffff;
             --soft-bg: #f8f9fa;
@@ -45,6 +47,7 @@
             --text-color: #e7edf5;
             --border-color: #465363;
             --muted-color: #c1ccda;
+            --label-color: #b8860b;
             --subtle-color: #a7b3c2;
             --input-bg: #253140;
             --soft-bg: #252f3b;
@@ -77,7 +80,7 @@
             border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px;
         }
 
-        h2 { text-align: center; color: var(--primary-color); margin-bottom: 14px; font-size: 20px; letter-spacing: 0.5px; }
+        h2 { text-align: center; color: #90b890; margin-bottom: 14px; font-size: 20px; letter-spacing: 0.5px; }
         .form-group { margin-bottom: 10px; }
         .theme-control { display: flex; justify-content: flex-end; align-items: center; gap: 9px; margin-bottom: 8px; color: var(--muted-color); font-size: 12px; font-weight: 600; }
         .theme-switch { width: 48px; height: 28px; padding: 3px; border: 0; border-radius: 999px; background: #adb5bd; cursor: pointer; transition: background-color 0.2s; }
@@ -85,13 +88,15 @@
         .theme-switch:focus-visible { outline: 3px solid rgba(0, 86, 179, 0.35); outline-offset: 2px; }
         .theme-switch-thumb { display: block; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 0.2s; }
         .theme-switch[aria-checked="true"] .theme-switch-thumb { transform: translateX(20px); }
-        label { display: block; font-weight: 600; font-size: 12px; margin-bottom: 4px; color: var(--muted-color); text-transform: uppercase; }
+        label { display: block; font-weight: 600; font-size: 12px; margin-bottom: 4px; color: var(--label-color); text-transform: uppercase; }
+        #supabasePanel { background: #f8f9fa; }
+        :root[data-theme="dark"] #supabasePanel { background: #000; }
 
         input[type="text"], input[type="date"] {
             width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
             border-radius: 8px; font-size: 16px; background-color: var(--input-bg); color: var(--text-color);
         }
-        input::placeholder { color: var(--placeholder-color); opacity: 1; }
+        input::placeholder { color: var(--placeholder-color); opacity: 0.55; }
         input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15); }
 
         .btn-group-foto { display: flex; gap: 8px; margin-top: 6px; }
@@ -131,7 +136,7 @@
         .history-details { flex:1; min-width:0; }
         .badge { background-color: var(--primary-color); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; }
         .record-item { background: var(--soft-bg); padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--primary-color); font-size: 12px; word-break: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .record-item strong { color: var(--primary-color); font-size: 13px; }
+        .record-item strong { color: #cc5500; font-size: 13px; }
         .record-photo { display: block; width: 96px; height: 72px; object-fit: cover; border-radius: 6px; margin: 8px 0; background: var(--placeholder-bg); }
         .empty-msg { text-align: center; color: var(--subtle-color); font-style: italic; font-size: 13px; padding: 8px; }
     </style>
@@ -145,7 +150,7 @@
             <span class="theme-switch-thumb" aria-hidden="true"></span>
         </button>
     </div>
-    <h2>FRENOS MÓVIL (Supabase)</h2>
+    <h2>Panel de Carga de Autos</h2>
     <div id="storageStatus" class="app-status" role="status" aria-live="polite">Preparando el almacenamiento local de este dispositivo…</div>
     <button type="button" class="btn btn-install" onclick="instalarAplicacion()">Instalar / agregar a inicio</button>
     <p id="pwaStatus" class="app-status" role="status" aria-live="polite">La instalación como app requiere abrir este sitio mediante HTTPS.</p>
@@ -205,7 +210,7 @@
     <button type="button" class="btn btn-export" onclick="sincronizarConSupabase()">Sincronizar con Supabase ☁️</button>
     <button type="button" class="btn btn-new-day" onclick="iniciarNuevoDia()">Start New Day</button>
     <button type="button" class="btn btn-primary" onclick="mostrarPanelSupabase()">Conectar a Supabase</button>
-    <div id="supabasePanel" style="margin-top:10px;padding:12px;border:1px solid #ced4da;border-radius:8px;background:#f8f9fa">
+    <div id="supabasePanel" style="margin-top:10px;padding:12px;border:1px solid #112438;border-radius:8px">
       <p style="font-size:13px;margin-bottom:8px">Ingresá el correo y la contraseña del usuario que creaste en Supabase. Se guardará la sesión en este teléfono.</p>
       <input id="supabaseEmail" type="email" autocomplete="username" placeholder="Correo electrónico" style="width:100%;padding:10px;margin-top:8px;border:1px solid #ced4da;border-radius:6px">
       <input id="supabasePassword" type="password" autocomplete="current-password" placeholder="Contraseña" style="width:100%;padding:10px;margin-top:8px;border:1px solid #ced4da;border-radius:6px">
